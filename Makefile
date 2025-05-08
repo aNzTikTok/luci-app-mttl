@@ -1,25 +1,38 @@
+# Define the package information
 include $(TOPDIR)/rules.mk
 
-# Package information
-LUCI_TITLE := TTL Changer
-PKG_NAME := luci-app-mttl
-PKG_VERSION := 1.0
-PKG_RELEASE := 1
+PKG_NAME:=luci-app-mttl
+PKG_VERSION:=1.0
+PKG_RELEASE:=1
 
-# Maintainer info
-PKG_MAINTAINER := dotycat <support@dotycat.com>
+PKG_MAINTAINER:=dotycat <support@dotycat.com>
+PKG_LICENSE:=GPL-3.0
 
-# Dependencies
-LUCI_DEPENDS := +luci +nftables
+LUCI_TITLE:=TTL Changer
+LUCI_DESCRIPTION:=This LuCI app allows you to change the TTL (Time to Live) value.
+LUCI_DEPENDS:=+luci +nftables
 
-# Define architecture (optional)
-LUCI_PKGARCH := all
+PKG_BUILD_DIR:=$(BUILD_DIR)/$(PKG_NAME)
 
-# Include necessary makefiles
 include $(INCLUDE_DIR)/package.mk
-include $(INCLUDE_DIR)/luci.mk
 
-# Installation process
+define Package/$(PKG_NAME)
+	SECTION:=luci
+	CATEGORY:=LuCI
+	SUBMENU:=3. Applications
+	TITLE:=$(LUCI_TITLE)
+	PKGARCH:=all
+	DEPENDS:=$(LUCI_DEPENDS)
+endef
+
+define Package/$(PKG_NAME)/description
+	$(LUCI_DESCRIPTION)
+endef
+
+define Build/Compile
+endef
+
+# Files to install
 define Package/$(PKG_NAME)/install
 	$(INSTALL_DIR) $(1)/usr/lib/lua/luci/controller
 	$(INSTALL_BIN) ./luasrc/controller/controller_ttlchanger.lua $(1)/usr/lib/lua/luci/controller/
