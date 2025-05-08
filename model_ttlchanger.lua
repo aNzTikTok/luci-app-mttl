@@ -24,12 +24,23 @@ custom_ttl.datatype = "uinteger"
 custom_ttl.default = "65"
 custom_ttl:depends("mode", "custom")
 
+local status_msg = s:option(DummyValue, "status_msg", "How to use?")
+status_msg.rawhtml = true
+status_msg.value = [[After making changes, click <strong>Save & Apply</strong> and then click the <strong>Reboot Now</strong> button to apply the changes.]]
+
+local reboot_button = s:option(Button, "reboot_button", "Reboot System")
+reboot_button.inputtitle = "Reboot Now"
+reboot_button.inputstyle = "apply"
+
+function reboot_button.write()
+    sys.call("/sbin/reboot")
+end
+
 function m.on_commit(map)
     local mode_val = uci:get("ttlchanger", "@ttl[0]", "mode") or "off"
     local custom_val = tonumber(uci:get("ttlchanger", "@ttl[0]", "custom_value")) or 64
     local ttl = (mode_val == "custom") and custom_val or 64
 
-    -- Prepare rule blocks
     local function get_chain(name, rule)
         return string.format([[
 chain %s {
@@ -49,7 +60,6 @@ chain %s {
         get_chain("mangle_postrouting_hoplimit64", hop_rule)
     }, "\n")
 
-    -- Replace old chains with new ones
     local original = fs.readfile(config_file) or ""
     local result = {}
     local skip = false
