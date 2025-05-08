@@ -24,15 +24,30 @@ custom_ttl.datatype = "uinteger"
 custom_ttl.default = "65"
 custom_ttl:depends("mode", "custom")
 
-local status_msg = s:option(DummyValue, "status_msg", "How to use?")
-status_msg.rawhtml = true
-status_msg.value = [[After making changes, click <strong>Save & Apply</strong> and then click the <strong>Reboot Now</strong> button to apply the changes.]]
+local html_table = s:option(DummyValue, "_html_table", "")
+html_table.rawhtml = true
+html_table.value = [[
+<table class="table table-striped">
+  <tr>
+    <td><strong>How to use?</strong></td>
+    <td>After making changes, click <strong>Save & Apply</strong> and then click the <strong>Reboot Now</strong> button to apply the changes.</td>
+  </tr>
+  <tr>
+    <td><strong>Reboot</strong></td>
+    <td>
+      <form method="post">
+        <input class="cbi-button cbi-button-apply" type="submit" name="cbi.reboot" value="Reboot Now" />
+      </form>
+    </td>
+  </tr>
+  <tr>
+    <td><strong>Developed by</strong></td>
+    <td><a href="https://t.me/dotycat" target="_blank">@dotycat</a> | <a href="https://dotycat.com" target="_blank">dotycat.com</a></td>
+  </tr>
+</table>
+]]
 
-local reboot_button = s:option(Button, "reboot_button", "Reboot System")
-reboot_button.inputtitle = "Reboot Now"
-reboot_button.inputstyle = "apply"
-
-function reboot_button.write()
+if luci.http.formvalue("cbi.reboot") then
     sys.call("/sbin/reboot")
 end
 
@@ -42,7 +57,7 @@ function m.on_commit(map)
     local ttl = (mode_val == "custom") and custom_val or 64
 
     local function get_chain(name, rule)
-        return string.format([[
+        return string.format([[ 
 chain %s {
   type filter hook %s priority 300; policy accept;
   counter%s
